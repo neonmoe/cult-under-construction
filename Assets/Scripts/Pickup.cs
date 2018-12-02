@@ -53,7 +53,7 @@ public class Pickup : MonoBehaviour {
 
 	// Drops the pickup on the spot
 	public void ThrowDown() {
-		Vector3 Force = Target.forward;
+		Vector3 Force = Target.forward * 2f;
 		Target = null;
 		RestoreState();
 		Body.AddForce(Force, ForceMode.Impulse);

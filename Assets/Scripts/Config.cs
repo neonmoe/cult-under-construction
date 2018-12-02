@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public static class Config {
-	public static Vector2 MouseSensitivity = new Vector2(1, 1);
+	public static Vector2 MouseSensitivity = new Vector2(1.5f, 1.5f);
 	public static bool InvertMouseX = false;
 	public static bool InvertMouseY = true;
 	public static float CameraBobbingIntensity = 1.0f;
