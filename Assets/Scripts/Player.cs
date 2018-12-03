@@ -51,6 +51,7 @@ public class Player : MonoBehaviour {
 	}
 
 	public bool LearnedFireball = false;
+	public bool LearnedFireballNotify = false;
 	public bool PickedupAshes = false;
 
 	public GameObject HappyVillage;
@@ -163,6 +164,11 @@ public class Player : MonoBehaviour {
 								MainNotification.Notify("<i>Oh! Seems like someone else already burnt the place down for you. How convenient.</i>", 5);
 								PickedupAshes = true;
 							}
+							if (Examinable.Name == ItemName.FireballBook && !LearnedFireball) {
+								LearnedFireball = true;
+								HappyVillage.SetActive(false);
+								AshesOfTheVillage.SetActive(true);
+							}
 						}
 					}
 				}
@@ -175,12 +181,6 @@ public class Player : MonoBehaviour {
 				ItemSounds Sfx = CurrentlyPickedUpObject.GetComponent<ItemSounds>();
 				if (Sfx != null) Sfx.Close();
 				Examinable Examinable = CurrentlyPickedUpObject.GetComponent<Examinable>();
-				if (Examinable.Name == ItemName.FireballBook && !LearnedFireball) {
-					MainNotification.Notify("<i>You now know how to cast Fireball!\n<size=20>(You know the title of the game. Pardon.)</size></i>", 5);
-					LearnedFireball = true;
-					HappyVillage.SetActive(false);
-					AshesOfTheVillage.SetActive(true);
-				}
 				CurrentlyPickedUpObject.gameObject.SetActive(false);
 				CurrentlyPickedUpObject = null;
 			}
@@ -213,6 +213,11 @@ public class Player : MonoBehaviour {
 			if (CurrentInventorySelectionIndex < 0) {
 				CurrentInventorySelectionIndex = Inventory.Count - 1;
 			}
+		}
+
+		if (LearnedFireball && !LearnedFireballNotify && CurrentlyPickedUpObject == null) {
+			MainNotification.Notify("<i>You now know how to cast Fireball!\n<size=20>(You know the title of the game. Pardon.)</size></i>", 5);
+			LearnedFireballNotify = true;
 		}
 
 		for (int i = 1; i <= 10; i++) {

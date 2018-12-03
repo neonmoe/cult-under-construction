@@ -44,6 +44,7 @@ public class Pickup : MonoBehaviour {
 		PickedUp = true;
 		Body.detectCollisions = false;
 		Body.isKinematic = true;
+		Body.interpolation = RigidbodyInterpolation.Interpolate;
 	}
 
 	// Puts pickup down where it used to be
