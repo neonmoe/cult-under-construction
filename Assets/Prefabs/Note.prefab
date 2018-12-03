@@ -78,6 +78,8 @@ GameObject:
   - component: {fileID: 65713652299842566}
   - component: {fileID: 114291594509645380}
   - component: {fileID: 114946581741502928}
+  - component: {fileID: 114140764814413038}
+  - component: {fileID: 82551941266340068}
   m_Layer: 0
   m_Name: Note
   m_TagString: Untagged
@@ -118,7 +120,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1995432183912476}
   m_LocalRotation: {x: 0.5964618, y: 0.3787206, z: -0.3773018, w: 0.5987049}
-  m_LocalPosition: {x: -0.313, y: 1.018, z: 0.759}
+  m_LocalPosition: {x: 0.991, y: 0.928, z: -97.743}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4077363031820236}
@@ -277,8 +279,103 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.3334999, y: 0.5000001, z: 0.02107404}
+  m_Size: {x: 0.275, y: 0.3, z: 0.02107404}
   m_Center: {x: 0, y: 0, z: 0.00000011920929}
+--- !u!82 &82551941266340068
+AudioSource:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1995432183912476}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 0.2
+  MaxDistance: 20
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1.02
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!95 &95406971658836280
 Animator:
   serializedVersion: 3
@@ -297,6 +394,26 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &114140764814413038
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1995432183912476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 529e652a8cf5bff4f8e78c3a91ed53a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OpenSfxPrefab: {fileID: 1892058549386356, guid: eec77cfd645848f4780e474c02bf558b,
+    type: 2}
+  CloseSfxPrefab: {fileID: 1033095549185444, guid: e1a8a9deb8f267e469c9580cb181d4df,
+    type: 2}
+  CollisionSfxPrefab: {fileID: 1892058549386356, guid: fac7c6172e9e9d74f944fef2b89df32c,
+    type: 2}
+  CollisionSfxCooldown: 0.2
+  CollisionVelocityThreshold: 0.2
+  CollidingBody: {fileID: 54700532115325466}
 --- !u!114 &114291594509645380
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -341,8 +458,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_fontColorGradient:
     topLeft: {r: 1, g: 1, b: 1, a: 1}
@@ -458,7 +575,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02087064f25c01d42bcc29cf4b99e49a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Name: 
+  Name: 0
 --- !u!222 &222868482218237860
 CanvasRenderer:
   m_ObjectHideFlags: 1

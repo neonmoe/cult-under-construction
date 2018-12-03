@@ -3,6 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum GroundType {
+	Stone, Grass
+}
+
+public enum TutorialStage {
+	None, Pickup, Inventory0, PostInventory0, Inventory1, Done
+}
+
 public class Player : MonoBehaviour {
 	public Transform PickupTarget;
 	public float InteractionDistance = 1.0f; 
@@ -13,9 +21,42 @@ public class Player : MonoBehaviour {
 	public CharacterController CharacterController;
 	public float JumpForce = 1.0f;
 	public float MovementSpeed = 1.0f;
+	public float SprintingMultiplier = 1.5f;
 	
 	public Text InventoryDisplay;
 	public Text ExaminationText;
+	public Text PickupTutorial;
+	public Text InventoryTutorial0;
+	public Text InventoryTutorial1;
+
+	public Notification MainNotification;
+
+	public GameObject FootstepGrassSfxPrefab;
+	public GameObject FootstepStoneSfxPrefab;
+	public GroundType CurrentGroundType {
+		get {
+			return _CurrentGroundType;
+		}
+		set {
+			_CurrentGroundType = value;
+			switch (value) {
+			case GroundType.Stone:
+				CamBobber.BobSfx = FootstepStoneSfxPrefab;
+				break;
+			case GroundType.Grass:
+				CamBobber.BobSfx = FootstepGrassSfxPrefab;
+				break;
+			}
+		}
+	}
+
+	public bool LearnedFireball = false;
+	public bool PickedupAshes = false;
+
+	public GameObject HappyVillage;
+	public GameObject AshesOfTheVillage;
+
+	private GroundType _CurrentGroundType = GroundType.Stone;
 
 	private float VelocityY = 0;
 	private float Pitch = 0;
@@ -24,11 +65,26 @@ public class Player : MonoBehaviour {
 	private List<GameObject> Inventory = new List<GameObject>();
 	private int CurrentInventorySelectionIndex = 0;
 
+	private float HoverTextAlpha = 0.0f;
+
+	private TutorialStage CurrentTutorialStage = TutorialStage.None;
+
 	private void Start() {
 		Pitch = CamTransform.localEulerAngles.x;
 		// TODO: Move cursor handling to pause menu or something
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
+		Color Color = PickupTutorial.color;
+		Color.a = 0;
+		PickupTutorial.color = Color;
+
+		Color = InventoryTutorial0.color;
+		Color.a = 0;
+		InventoryTutorial0.color = Color;
+
+		Color = InventoryTutorial1.color;
+		Color.a = 0;
+		InventoryTutorial1.color = Color;
 	}
 	
 	private void Update() {
@@ -54,8 +110,9 @@ public class Player : MonoBehaviour {
 		Vector3 Move = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 		Move = CamTransform.TransformDirection(Move);
 		Move.y = 0;
-		Move = Move.normalized * MovementSpeed;
+		Move = Move.normalized * MovementSpeed * (Input.GetButton("Sprint") ? SprintingMultiplier : 1);
 		CamBobber.Bob = Move.magnitude > 0.05;
+		CamBobber.BobFrequency = 2 * (Input.GetButton("Sprint") ? SprintingMultiplier : 1);
 		if (CharacterController.isGrounded) {
 			if (Input.GetButtonDown("Jump")) {
 				VelocityY = JumpForce;
@@ -76,14 +133,13 @@ public class Player : MonoBehaviour {
 				Interactable.Interact(CurrentlyPickedUpObject != null ? CurrentlyPickedUpObject.gameObject : null);
 			} else {
 				if (CurrentlyPickedUpObject != null) {
-					bool CloseEnough = (CurrentlyPickedUpObject.GetOriginalPosition() - CamTransform.position).magnitude < InteractionDistance * .5f;
 					int Index = Inventory.IndexOf(CurrentlyPickedUpObject.gameObject);
 					if (CurrentInventorySelectionIndex >= Index && CurrentInventorySelectionIndex > 0) {
 						CurrentInventorySelectionIndex--;
 					}
 					Inventory.RemoveAt(Index);
-					if (CloseEnough) {
-						CurrentlyPickedUpObject.PutDown();
+					if (LookedAtObject != null) {
+						CurrentlyPickedUpObject.PutDown(hit.point, -hit.normal);
 						CurrentlyPickedUpObject = null;
 					} else {
 						CurrentlyPickedUpObject.ThrowDown();
@@ -93,10 +149,20 @@ public class Player : MonoBehaviour {
 					if (LookedAtObject != null) {
 						Pickup Target = LookedAtObject.GetComponent<Pickup>();
 						if (Target != null) {
+							ItemSounds Sfx = LookedAtObject.GetComponent<ItemSounds>();
+							if (Sfx != null) Sfx.Open();
 							Target.PickUp(PickupTarget);
 							CurrentlyPickedUpObject = Target;
 							Inventory.Add(Target.gameObject);
 							CurrentInventorySelectionIndex = Inventory.Count - 1;
+							if (CurrentTutorialStage == TutorialStage.Pickup) {
+								CurrentTutorialStage = TutorialStage.PostInventory0;
+							}
+							Examinable Examinable = CurrentlyPickedUpObject.GetComponent<Examinable>();
+							if (Examinable.Name == ItemName.AshesOfHappyVillage && !PickedupAshes) {
+								MainNotification.Notify("<i>Oh! Seems like someone else already burnt the place down for you. How convenient.</i>", 5);
+								PickedupAshes = true;
+							}
 						}
 					}
 				}
@@ -106,6 +172,15 @@ public class Player : MonoBehaviour {
 		if (Input.GetButtonDown("Put Into / Pull From Bag")) {
 			Pickup PreviousPickup = CurrentlyPickedUpObject;
 			if (CurrentlyPickedUpObject != null) {
+				ItemSounds Sfx = CurrentlyPickedUpObject.GetComponent<ItemSounds>();
+				if (Sfx != null) Sfx.Close();
+				Examinable Examinable = CurrentlyPickedUpObject.GetComponent<Examinable>();
+				if (Examinable.Name == ItemName.FireballBook && !LearnedFireball) {
+					MainNotification.Notify("<i>You now know how to cast Fireball!\n<size=20>(You know the title of the game. Pardon.)</size></i>", 5);
+					LearnedFireball = true;
+					HappyVillage.SetActive(false);
+					AshesOfTheVillage.SetActive(true);
+				}
 				CurrentlyPickedUpObject.gameObject.SetActive(false);
 				CurrentlyPickedUpObject = null;
 			}
@@ -115,17 +190,25 @@ public class Player : MonoBehaviour {
 				if (ItemPickup != PreviousPickup) {
 					Item.SetActive(true);
 					CurrentlyPickedUpObject = ItemPickup;
+					ItemSounds Sfx = Item.GetComponent<ItemSounds>();
+					if (Sfx != null) Sfx.Open();
 				}
+			}
+			if (Inventory.Count > 1 && CurrentTutorialStage == TutorialStage.PostInventory0) {
+				CurrentTutorialStage = TutorialStage.Inventory1;
 			}
 		}
 		// The "look through inventory" action
 		float Scroll = Input.GetAxis("Mouse ScrollWheel");
-		if (Scroll > 0) {
+		if (Scroll != 0 && CurrentTutorialStage == TutorialStage.Inventory1) {
+			CurrentTutorialStage = TutorialStage.Done;
+		}
+		if (Scroll < 0) {
 			CurrentInventorySelectionIndex++;
 			if (CurrentInventorySelectionIndex >= Inventory.Count) {
 				CurrentInventorySelectionIndex = 0;
 			}
-		} else if (Scroll < 0) {
+		} else if (Scroll > 0) {
 			CurrentInventorySelectionIndex--;
 			if (CurrentInventorySelectionIndex < 0) {
 				CurrentInventorySelectionIndex = Inventory.Count - 1;
@@ -171,13 +254,40 @@ public class Player : MonoBehaviour {
 		InventoryDisplay.text = InventorySummary;
 
 		// Update examination text
-		ExaminationText.text = "";
+		string NewExaminationText = "";
 		if (LookedAtObject != null) {
 			Examinable Examinable = LookedAtObject.GetComponent<Examinable>();
 			if (Examinable != null) {
-				ExaminationText.text = Examinable.Name;
+				NewExaminationText = Examinable.ToString();
+				if (CurrentTutorialStage == TutorialStage.None) {
+					CurrentTutorialStage = TutorialStage.Pickup;
+				}
 			}
 		}
+		if (NewExaminationText == "") {
+			HoverTextAlpha = 0.0f;
+		} else {
+			HoverTextAlpha = 1.0f;
+		}
+		Color ExaminationTextColor = ExaminationText.color;
+		ExaminationTextColor.a = Mathf.Lerp(ExaminationTextColor.a, HoverTextAlpha, 20f * Time.deltaTime);
+		ExaminationText.color = ExaminationTextColor;
+		if (NewExaminationText != "") {
+			ExaminationText.text = NewExaminationText;
+		}
+
+		// Update tutorial texts
+		Color Color = PickupTutorial.color;
+		Color.a = Mathf.Lerp(Color.a, CurrentTutorialStage == TutorialStage.Pickup ? 1 : 0, 5f * Time.deltaTime);
+		PickupTutorial.color = Color;
+
+		Color = InventoryTutorial0.color;
+		Color.a = Mathf.Lerp(Color.a, CurrentTutorialStage == TutorialStage.Inventory0 ? 1 : 0, 5f * Time.deltaTime);
+		InventoryTutorial0.color = Color;
+
+		Color = InventoryTutorial1.color;
+		Color.a = Mathf.Lerp(Color.a, CurrentTutorialStage == TutorialStage.Inventory1 ? 1 : 0, 5f * Time.deltaTime);
+		InventoryTutorial1.color = Color;
 	}
 }
 
