@@ -89,6 +89,9 @@ public class Player : MonoBehaviour {
 	}
 	
 	private void Update() {
+		if (Input.GetKeyDown(KeyCode.I)) {
+			Config.InvertMouseY = !Config.InvertMouseY;
+		}
 		if (Input.GetKeyDown(KeyCode.Escape)) {
 			Application.Quit();
 		}
